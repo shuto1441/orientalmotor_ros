@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="orientalmotor_ros" name="motor_control" type="modbus_motor_reconfigure.py"/>
+    <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="motor_reconfigure" args="motor_control"/>
+</launch>
