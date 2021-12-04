@@ -76,13 +76,13 @@ include_directories(
 
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
- )
- # configファイルを追加
+generate_messages(
+  DEPENDENCIES
+  std_msgs  # Or other packages containing msgs
+)
+# configファイルを追加
 generate_dynamic_reconfigure_options(
-  cfg/modbus_motor.cfg
+  cfg/motor.cfg
 )
 # # c++ ROSノードの追加
 # add_executable(modbus_motor scripts/modbus_motor.cpp)

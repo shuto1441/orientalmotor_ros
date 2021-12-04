@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import rospy
 
 from dynamic_reconfigure.server import Server
-from orientalmotor_ros.cfg import modbus_motorConfig
+from orientalmotor_ros.cfg import motorConfig
 from orientalmotor_ros.msg import motor
 from rospy import client
 import serial
@@ -17,7 +17,7 @@ class modbus_ros():
         self.size = 16
         self.pulse_angle= 0.36
         print(self.client.name)
-        self.srv = Server(modbus_motorConfig, self.callback)
+        self.srv = Server(motorConfig, self.callback)
         self.master = tk.Tk()
         button1 = tk.Button(self.master, text="positiong rotate", command=lambda: self.positioning_rotate(motor))
         button1.pack()
@@ -31,9 +31,11 @@ class modbus_ros():
 
     def callback(self, config, level):
         rospy.loginfo("""Reconfigure Request: {rpm}, {angle}, {reverse}""".format(**config))
-        motor.rpm = int("{rpm}".format(**config))
-        motor.angle = int("{angle}".format(**config))
-        motor.reverse = "{reverse}".format(**config)
+        motor.rpm = config['rpm']
+        motor.angle = config['angle']
+        motor.reverse = config['reverse']
+        motor.acceleration = config['acceleration']
+        motor.deceleration = config['deceleration']
         return config
 
     def positioning_rotate(self,msg):
@@ -64,7 +66,7 @@ class modbus_ros():
         reverse = msg.reverse
         self.apply_rpm(rpm)
         time.sleep(0.5)
-        if(reverse=="True"):
+        if(reverse):
             self.rvs_on()
         else:
             self.fwd_on()
@@ -130,7 +132,7 @@ class modbus_ros():
         reverse = msg.reverse
         print(msg.reverse)
         print(reverse)
-        if(reverse=="True"):
+        if(reverse):
             command = b"\x01\x10\x04\x00\x00\x02\x04" + self.angle_to_bytes_rvs(angle)
         else:
             command = b"\x01\x10\x04\x00\x00\x02\x04" + self.angle_to_bytes(angle)
