@@ -36,6 +36,7 @@ class modbus_ros():
         motor.reverse = config['reverse']
         motor.acceleration = config['acceleration']
         motor.deceleration = config['deceleration']
+        motor.header.stamp = rospy.Time.now()
         return config
 
     def positioning_rotate(self,msg):
@@ -99,13 +100,13 @@ class modbus_ros():
         hz = int(rpm/60*360/self.pulse_angle)
         command = hz.to_bytes(2,byteorder='big')
         return command
-    
+
     def rpm_acceleration_to_bytes(self,acceleration):
         hz = int(acceleration/60*360/self.pulse_angle)
         time = 1000/hz*1000
         command = time.to_bytes(4,byteorder='big')
         return command
-    
+
     def apply_acceleration(self,msg):
         acceleration = msg.acceleration
         command = b"\x01\x06\x06\x01" + self.rpm_acceleration_to_bytes(acceleration)
