@@ -1,4 +1,4 @@
 <launch>
-    <node pkg="orientalmotor_ros" name="motor_control" type="motor_reconfigure.py"/>
+    <node pkg="orientalmotor_ros" name="motor_control" type="serial_node.py"/>
     <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="reconfigure" args="motor_control"/>
 </launch>
