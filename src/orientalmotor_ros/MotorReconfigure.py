@@ -188,7 +188,3 @@ class modbus_ros():
 
 
 
-if __name__ == "__main__":
-    rospy.init_node("orientalmotor_ros", anonymous = True)
-    motor_controller = modbus_ros()
-    rospy.spin()
