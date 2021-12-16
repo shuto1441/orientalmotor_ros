@@ -9,26 +9,22 @@ find_package(catkin REQUIRED COMPONENTS
     dynamic_reconfigure
 )
 
-## Generate messages in the 'msg' folder
 add_message_files(
     FILES
     motor.msg
 )
 
-
+catkin_python_setup()
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-
-
-## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
+  std_msgs
 )
-# configファイルを追加
+
 generate_dynamic_reconfigure_options(
   cfg/motor.cfg
 )
@@ -38,4 +34,4 @@ catkin_package()
 catkin_install_python(
   PROGRAMS nodes/serial_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
+)

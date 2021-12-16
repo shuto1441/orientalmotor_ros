@@ -6,6 +6,6 @@ import sys
 
 if __name__ == "__main__":
 
-    rospy.init_node("orientalmotor_ros", anonymous = True)
+    rospy.init_node("motor_control", anonymous = True)
     motor_controller = MotorReconfigure.modbus_ros()
     rospy.spin()

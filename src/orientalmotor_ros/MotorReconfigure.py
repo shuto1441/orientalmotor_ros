@@ -12,8 +12,7 @@ import tkinter as tk
 
 class modbus_ros():
     def __init__(self):
-        #通信の接続
-        self.client = serial.Serial("/dev/ttyUSB0", 115200, timeout=0.01, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE)
+        self.client = serial.Serial("/dev/ttyUSB1", 115200, timeout=0.01, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE)
         self.size = 16
         self.pulse_angle= 0.36
         print(self.client.name)
@@ -21,12 +20,10 @@ class modbus_ros():
         self.master = tk.Tk()
         button1 = tk.Button(self.master, text="positiong rotate", command=lambda: self.positioning_rotate(motor))
         button1.pack()
-        button2 = tk.Button(self.master, text="return to origin", command=lambda:self.return_to_origin())
+        button2 = tk.Button(self.master, text="continuous rotate", command=lambda: self.continuous_rotate(motor))
         button2.pack()
-        button3 = tk.Button(self.master, text="continuous rotate", command=lambda: self.continuous_rotate(motor))
+        button3 = tk.Button(self.master, text="stop rotate", command=lambda:self.off())
         button3.pack()
-        button4 = tk.Button(self.master, text="stop rotate", command=lambda:self.off())
-        button4.pack()
         self.master.mainloop()
 
     def callback(self, config, level):
@@ -36,7 +33,7 @@ class modbus_ros():
         motor.reverse = config['reverse']
         motor.acceleration = config['acceleration']
         motor.deceleration = config['deceleration']
-        motor.header.stamp = rospy.Time.now()
+        #motor.header.stamp = rospy.Time.now()
         return config
 
     def positioning_rotate(self,msg):
@@ -72,7 +69,6 @@ class modbus_ros():
         else:
             self.fwd_on()
 
-    #運転データNo.0の運転方式
     def apply_operation_method(self):
         command = b"\x01\x06\x05\x01\x00\x00\xd8\xc6"
         self.client.write(command)
@@ -88,7 +84,6 @@ class modbus_ros():
                 crc_register >>= 1
                 if overflow:
                     crc_register ^= 0xA001
-        # 結果は(上位→下位)の順
         return crc_register.to_bytes(2, 'little')
 
     def angle_to_bytes(self,angle):
@@ -149,7 +144,6 @@ class modbus_ros():
         result = self.client.read(self.size)
         print("rpm set: {}".format(result))
 
-    #START入力 ON （運転No.0 運転開始）
     def start_on(self):
         command = b"\x01\x06\x00\x7d\x00\x08"
         command += self.error_check(command)
@@ -157,7 +151,6 @@ class modbus_ros():
         result = self.client.read(self.size)
         print("start on: {}".format(result))
 
-    #START入力 OFF （運転No.0 運転終了）
     def off(self):
         command = b"\x01\x06\x00\x7d\x00\x00"
         command += self.error_check(command)
@@ -185,6 +178,5 @@ class modbus_ros():
         self.client.write(command)
         result = self.client.read(self.size)
         print("home on: {}".format(result))
-
 
 
