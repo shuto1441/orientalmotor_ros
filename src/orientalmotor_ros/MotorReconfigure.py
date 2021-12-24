@@ -8,7 +8,8 @@ from orientalmotor_ros.msg import motor
 from rospy import client
 import serial
 import time
-import tkinter as tk
+import Tkinter as tk
+import struct
 
 class modbus_ros():
     def __init__(self):
@@ -84,22 +85,26 @@ class modbus_ros():
                 crc_register >>= 1
                 if overflow:
                     crc_register ^= 0xA001
-        return crc_register.to_bytes(2, 'little')
+        #return crc_register.to_bytes(2, 'little')
+        return struct.pack("<i", crc_register)
 
     def angle_to_bytes(self,angle):
         step = int(angle/self.pulse_angle)
-        command = step.to_bytes(4,byteorder='big')
+        #command = step.to_bytes(4,byteorder='big')
+        command = struct.pack(">i", step)
         return command
 
     def rpm_to_bytes(self,rpm):
         hz = int(rpm/60*360/self.pulse_angle)
-        command = hz.to_bytes(2,byteorder='big')
+        #command = hz.to_bytes(2,byteorder='big')
+        command = struct.pack(">h", hz)
         return command
 
     def rpm_acceleration_to_bytes(self,acceleration):
         hz = int(acceleration/60*360/self.pulse_angle)
         time = 1000/hz*1000
-        command = time.to_bytes(4,byteorder='big')
+        #command = time.to_bytes(4,byteorder='big')
+        command = struct.pack(">i", time)
         return command
 
     def apply_acceleration(self,msg):
@@ -120,7 +125,8 @@ class modbus_ros():
 
     def angle_to_bytes_rvs(self,angle):
         step = int(-angle/self.pulse_angle)
-        command = step.to_bytes(4,byteorder='big', signed=True)
+        #command = step.to_bytes(4,byteorder='big', signed=True)
+        command = struct.pack(">i", step)
         return command
 
     def apply_angle(self,msg):
