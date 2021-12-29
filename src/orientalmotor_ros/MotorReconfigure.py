@@ -15,7 +15,7 @@ class modbus_ros():
     def __init__(self):
         self.client = serial.Serial("/dev/ttyUSB0", 115200, timeout=0.01, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE)
         self.size = 16
-        self.pulse_angle= 0.36
+        self.pulse_angle = 0.36
         print(self.client.name)
         self.srv = Server(motorConfig, self.callback)
         self.master = tk.Tk()
@@ -86,7 +86,7 @@ class modbus_ros():
         command = struct.pack(">H", hz)
         return command
 
-    def _rpm_acceleration_to_bytes(self,acceleration):
+    def _rpm_acceleration_to_bytes(self, acceleration):
         hz = int(acceleration / 60 * 360 / self.pulse_angle)
         time = 1000 / hz * 1000
         command = struct.pack(">I", time)
@@ -108,7 +108,7 @@ class modbus_ros():
         result = self.client.read(self.size)
         print("deceleration set: {}".format(result))
 
-    def _angle_to_bytes_rvs(self,angle):
+    def _angle_to_bytes_rvs(self, angle):
         step = int(-angle / self.pulse_angle)
         command = struct.pack(">i", step)
         return command
