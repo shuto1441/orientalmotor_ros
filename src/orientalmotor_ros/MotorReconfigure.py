@@ -5,27 +5,36 @@ import rospy
 from dynamic_reconfigure.server import Server
 from orientalmotor_ros.cfg import motorConfig
 from orientalmotor_ros.msg import motor
-from rospy import client
 import serial
 import time
-import Tkinter as tk
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QVBoxLayout
 import struct
 
-class modbus_ros():
+class OrientalMotor(QMainWindow):
     def __init__(self):
-        self.client = serial.Serial("/dev/ttyUSB0", 115200, timeout=0.01, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE)
+        super(OrientalMotor, self).__init__()
+        self.client = serial.Serial("/dev/ttyUSB1", 115200, timeout=0.01, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE)
         self.size = 16
         self.pulse_angle = 0.36
         print(self.client.name)
         self.srv = Server(motorConfig, self.callback)
-        self.master = tk.Tk()
-        button1 = tk.Button(self.master, text="positiong rotate", command=lambda: self.positioning_rotate(motor))
-        button1.pack()
-        button2 = tk.Button(self.master, text="continuous rotate", command=lambda: self.continuous_rotate(motor))
-        button2.pack()
-        button3 = tk.Button(self.master, text="stop rotate", command=lambda:self._off())
-        button3.pack()
-        self.master.mainloop()
+        self.initUI()
+
+    def initUI(self):
+        self.window = QWidget()
+        self.window.setWindowTitle('Motor_controller')
+        self.layout = QVBoxLayout()
+        self.button1 = QPushButton("positiong rotate", self)
+        self.button2 = QPushButton("continuous rotate", self)
+        self.button3 = QPushButton("stop rotate", self)
+        self.button1.clicked.connect(lambda: self.positioning_rotate(motor))
+        self.button2.clicked.connect(lambda: self.continuous_rotate(motor))
+        self.button3.clicked.connect(self.off)
+        self.layout.addWidget(self.button1)
+        self.layout.addWidget(self.button2)
+        self.layout.addWidget(self.button3)
+        self.window.setLayout(self.layout)
+        self.window.show()
 
     def callback(self, config, level):
         rospy.loginfo("""Reconfigure Request: {rpm}, {angle}, {reverse}""".format(**config))
@@ -53,12 +62,12 @@ class modbus_ros():
         # time.sleep(0.1)
         self._start_on()
         time.sleep(0.1)
-        self._off()
+        self.off()
 
     def return_to_origin(self):
         self._home_on()
         time.sleep(1)
-        self._off()
+        self.off()
 
     def continuous_rotate(self, msg):
         rpm = msg.rpm
@@ -141,7 +150,7 @@ class modbus_ros():
         result = self.client.read(self.size)
         print("start on: {}".format(result))
 
-    def _off(self):
+    def off(self):
         command = b"\x01\x06\x00\x7d\x00\x00"
         command += self._error_check(command)
         self.client.write(command)
