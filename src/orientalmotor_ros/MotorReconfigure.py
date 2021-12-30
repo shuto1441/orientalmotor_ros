@@ -7,13 +7,13 @@ from orientalmotor_ros.cfg import motorConfig
 from orientalmotor_ros.msg import motor
 import serial
 import time
-from PyQt5.QtWidgets import QMainWindow, QPushButton
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QVBoxLayout
 import struct
 
 class OrientalMotor(QMainWindow):
     def __init__(self):
-        super().__init__()
-        self.client = serial.Serial("/dev/ttyUSB0", 115200, timeout=0.01, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE)
+        super(OrientalMotor, self).__init__()
+        self.client = serial.Serial("/dev/ttyUSB1", 115200, timeout=0.01, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE)
         self.size = 16
         self.pulse_angle = 0.36
         print(self.client.name)
@@ -21,21 +21,20 @@ class OrientalMotor(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        btn1 = QPushButton("positiong rotate", self)
-        btn1.move(30, 50)
-
-        btn2 = QPushButton("continuous rotate", self)
-        btn2.move(150, 50)
-
-        btn3 = QPushButton("stop rotate", self)
-        btn3.move(270, 50)
-        btn1.clicked.connect(lambda: self.positioning_rotate(motor))
-        btn2.clicked.connect(lambda: self.continuous_rotate(motor))
-        btn2.clicked.connect(self._off)
-
-        self.setGeometry(400, 300, 290, 150)
-        self.setWindowTitle('Motor_controller')
-        self.show()
+        self.window = QWidget()
+        self.window.setWindowTitle('Motor_controller')
+        self.layout = QVBoxLayout()
+        self.button1 = QPushButton("positiong rotate", self)
+        self.button2 = QPushButton("continuous rotate", self)
+        self.button3 = QPushButton("stop rotate", self)
+        self.button1.clicked.connect(lambda: self.positioning_rotate(motor))
+        self.button2.clicked.connect(lambda: self.continuous_rotate(motor))
+        self.button3.clicked.connect(self.off)
+        self.layout.addWidget(self.button1)
+        self.layout.addWidget(self.button2)
+        self.layout.addWidget(self.button3)
+        self.window.setLayout(self.layout)
+        self.window.show()
 
     def callback(self, config, level):
         rospy.loginfo("""Reconfigure Request: {rpm}, {angle}, {reverse}""".format(**config))
@@ -63,12 +62,12 @@ class OrientalMotor(QMainWindow):
         # time.sleep(0.1)
         self._start_on()
         time.sleep(0.1)
-        self._off()
+        self.off()
 
     def return_to_origin(self):
         self._home_on()
         time.sleep(1)
-        self._off()
+        self.off()
 
     def continuous_rotate(self, msg):
         rpm = msg.rpm
@@ -151,7 +150,7 @@ class OrientalMotor(QMainWindow):
         result = self.client.read(self.size)
         print("start on: {}".format(result))
 
-    def _off(self):
+    def off(self):
         command = b"\x01\x06\x00\x7d\x00\x00"
         command += self._error_check(command)
         self.client.write(command)
