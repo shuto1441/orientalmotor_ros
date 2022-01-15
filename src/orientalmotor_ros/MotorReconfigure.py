@@ -23,12 +23,11 @@ class OrientalMotor(QMainWindow):
     def initUI(self):
         btn1 = QPushButton("positiong rotate", self)
         btn1.move(30, 50)
-
         btn2 = QPushButton("continuous rotate", self)
         btn2.move(150, 50)
-
         btn3 = QPushButton("stop rotate", self)
         btn3.move(270, 50)
+
         btn1.clicked.connect(lambda: self.positioning_rotate(motor))
         btn2.clicked.connect(lambda: self.continuous_rotate(motor))
         btn2.clicked.connect(self._off)
