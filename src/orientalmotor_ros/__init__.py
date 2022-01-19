@@ -1,1 +1,1 @@
-from .MotorReconfigure import *
+from .MotorReconfigure2 import *
