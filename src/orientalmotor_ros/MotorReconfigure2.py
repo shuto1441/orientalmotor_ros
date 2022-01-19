@@ -1,40 +1,26 @@
 #!/usr/bin/env python
 
 import rospy
+import serial
+import time
+import struct
+from std_msgs.msg import Empty
 
 from dynamic_reconfigure.server import Server
 from orientalmotor_ros.cfg import motorConfig
 from orientalmotor_ros.msg import motor
-import serial
-import time
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QVBoxLayout
-import struct
 
-class OrientalMotor(QMainWindow):
+
+class OrientalMotor:
     def __init__(self):
-        super(OrientalMotor, self).__init__()
         self.client = serial.Serial("/dev/ttyUSB1", 115200, timeout=0.01, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE)
         self.size = 16
         self.pulse_angle = 0.36
         print(self.client.name)
         self.srv = Server(motorConfig, self.callback)
-        self.initUI()
-
-    def initUI(self):
-        self.window = QWidget()
-        self.window.setWindowTitle('Motor_controller')
-        self.layout = QVBoxLayout()
-        self.button1 = QPushButton("positiong rotate", self)
-        self.button2 = QPushButton("continuous rotate", self)
-        self.button3 = QPushButton("stop rotate", self)
-        self.button1.clicked.connect(lambda: self.positioning_rotate(motor))
-        self.button2.clicked.connect(lambda: self.continuous_rotate(motor))
-        self.button3.clicked.connect(self.off)
-        self.layout.addWidget(self.button1)
-        self.layout.addWidget(self.button2)
-        self.layout.addWidget(self.button3)
-        self.window.setLayout(self.layout)
-        self.window.show()
+        rospy.Subscriber("motor/positioning_rotate", Empty, lambda: self.positioning_rotate(motor), queue_size=8)
+        rospy.Subscriber("motor/continuous_rotate", Empty, lambda: self.continuous_rotate(motor), queue_size=8)
+        rospy.Subscriber("motor/stop", Empty, self.off, queue_size=8)
 
     def callback(self, config, level):
         rospy.loginfo("""Reconfigure Request: {rpm}, {angle}, {reverse}""".format(**config))
