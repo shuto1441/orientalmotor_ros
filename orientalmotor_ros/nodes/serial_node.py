@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
 import rospy
-from orientalmotor_ros import MotorReconfigure
+from orientalmotor_ros import OrientalMotor
+
 
 def main():
     rospy.init_node("motor_control")
-    sub = MotorReconfigure.OrientalMotor()
-
+    port = rospy.get_param('~port', '/dev/ttyUSB0')
+    sub = OrientalMotor(port)
     rospy.spin()
+
 
 if __name__ == '__main__':
     main()
