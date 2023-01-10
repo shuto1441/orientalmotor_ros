@@ -12,6 +12,7 @@ The following commands will build and install our software with default settings
 ```
 git clone https://github.com/TheImagingSource/tiscamera.git
 cd tiscamera
+git checkout v-tiscamera-1.0.0
 # only works on Debian based systems like Ubuntu
 sudo ./scripts/install-dependencies.sh --compilation --runtime
 mkdir build
