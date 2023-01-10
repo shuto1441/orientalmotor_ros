@@ -56,18 +56,14 @@ class Camera:
             pixelformat = "GRAY8"
 
         if liveview:
-            p = 'tcambin serial="%s" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1' % (
+            p = 'tcambin serial="%s-aravis" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1' % (
                 serial, pixelformat, width, height, framerate,)
             p += ' ! tee name=t'
             p += ' t. ! queue ! videoconvert ! video/x-raw,format=RGB ,width=%d,height=%d,framerate=%d/1! shmsink socket-path=/tmp/ros_mem' % (
                 width, height, framerate,)
             p += ' t. ! queue ! videoconvert ! ximagesink'
         else:
-            # p = 'tcambin serial="%s" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1' % (
-            #     serial, pixelformat, width, height, framerate,)
-            # p += ' ! videoconvert ! video/x-raw,format=RGB ,width=%d,height=%d,framerate=%d/1! shmsink socket-path=/tmp/ros_mem' % (
-            #     width, height, framerate,)
-            p = 'tcambin serial="%s" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! videoconvert ! shmsink socket-path=/tmp/ros_mem' % (serial, pixelformat, width, height, framerate,)
+            p = 'tcambin serial="%s-aravis" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! videoconvert ! shmsink socket-path=/tmp/ros_mem' % (serial, pixelformat, width, height, framerate,)
 
 
         print(p)

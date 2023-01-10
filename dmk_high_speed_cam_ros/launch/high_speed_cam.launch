@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <launch>
 
-  <arg name="width" default="360" />
-  <arg name="height" default="280" />
+  <arg name="width" default="320" />
+  <arg name="height" default="240" />
   <arg name="fps" default="950" />
-  <arg name="cam_id" default="30120113-aravis" />
+  <arg name="cam_id" />
 
   <node pkg="dmk_high_speed_cam_ros" type="tis_rosstarter" name="tiscam_node" output="screen" args="--width $(arg width) --height $(arg height) --fps $(arg fps) --cam_id $(arg cam_id)" />
 
