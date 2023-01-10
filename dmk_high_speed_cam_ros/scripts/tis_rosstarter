@@ -26,9 +26,8 @@ cam = tiscamera.Camera(args.cam_id, args.width, args.height, args.fps, False, Fa
 cam.start_pipeline()
 
 # Set some properties
-cam.set_property("Exposure Auto", True)
-cam.set_property("Gain Auto", True)
-cam.set_property("Brightness Reference", 128)
+cam.set_property("ExposureAuto", "Continuous")
+cam.set_property("GainAuto", "Continuous")
 
 
 input("Press Enter to end program")
