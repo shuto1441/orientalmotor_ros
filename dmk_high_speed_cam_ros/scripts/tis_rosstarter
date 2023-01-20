@@ -10,9 +10,9 @@ import tiscamera
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--cam_id', default="30120113-aravis")
-parser.add_argument('--width', type=int, default=360)
-parser.add_argument('--height', type=int, default=280)
+parser.add_argument('--cam_id', type=str)
+parser.add_argument('--width', type=int, default=320)
+parser.add_argument('--height', type=int, default=240)
 parser.add_argument('--fps', type=int, default=950)
 
 #args = parser.parse_args()
@@ -26,9 +26,8 @@ cam = tiscamera.Camera(args.cam_id, args.width, args.height, args.fps, False, Fa
 cam.start_pipeline()
 
 # Set some properties
-cam.set_property("Exposure Auto", True)
-cam.set_property("Gain Auto", True)
-cam.set_property("Brightness Reference", 128)
+cam.set_property("ExposureAuto", "Continuous")
+cam.set_property("GainAuto", "Continuous")
 
 
 input("Press Enter to end program")

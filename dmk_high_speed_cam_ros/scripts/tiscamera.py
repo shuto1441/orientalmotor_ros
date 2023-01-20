@@ -3,7 +3,7 @@ import os
 import subprocess
 from collections import namedtuple
 import gi
-gi.require_version("Tcam", "0.1")
+gi.require_version("Tcam", "1.0")
 gi.require_version("Gst", "1.0")
 from gi.repository import Tcam, Gst, GLib, GObject
 
@@ -56,18 +56,14 @@ class Camera:
             pixelformat = "GRAY8"
 
         if liveview:
-            p = 'tcambin serial="%s" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1' % (
+            p = 'tcambin serial="%s-aravis" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1' % (
                 serial, pixelformat, width, height, framerate,)
             p += ' ! tee name=t'
             p += ' t. ! queue ! videoconvert ! video/x-raw,format=RGB ,width=%d,height=%d,framerate=%d/1! shmsink socket-path=/tmp/ros_mem' % (
                 width, height, framerate,)
             p += ' t. ! queue ! videoconvert ! ximagesink'
         else:
-            # p = 'tcambin serial="%s" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1' % (
-            #     serial, pixelformat, width, height, framerate,)
-            # p += ' ! videoconvert ! video/x-raw,format=RGB ,width=%d,height=%d,framerate=%d/1! shmsink socket-path=/tmp/ros_mem' % (
-            #     width, height, framerate,)
-            p = 'tcambin serial="%s" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! videoconvert ! shmsink socket-path=/tmp/ros_mem' % (serial, pixelformat, width, height, framerate,)
+            p = 'tcambin serial="%s-aravis" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1 ! videoconvert ! shmsink socket-path=/tmp/ros_mem' % (serial, pixelformat, width, height, framerate,)
 
 
         print(p)
@@ -131,10 +127,13 @@ class Camera:
         :return: Current value of the property.
         """
         try:
-            return CameraProperty(*self.source.get_tcam_property(property_name))
+            property_base = self.source.get_tcam_property(property_name)
+            property_type = property_base.get_property_type()
+            print("property_name: {}: type: {}, default value: {}, list: {}".format(property_name, property_type, property_base.get_value(), property_base.get_enum_entries()))
+            return property_base
         except GLib.Error as error:
             raise RuntimeError(
-                "Error get Property {0}: {1}", property_name, format(error))
+                "Error get Property {}: {}. Please find the name list from {}".format(property_name, format(error), self.source.get_tcam_property_names()))
 
     def set_property(self, property_name, value):
         """ Set a property. Use list_properties for querying names of available properties.
@@ -144,7 +143,18 @@ class Camera:
         :return:
         """
         try:
-            self.source.set_tcam_property(property_name, value)
+            property_base = self.source.get_tcam_property(property_name)
+            property_type = property_base.get_property_type()
+            if property_type == Tcam.PropertyType.FLOAT:
+                self.source.set_tcam_float(property_name, value)
+            elif property_type == Tcam.PropertyType.INTEGER:
+                self.source.set_tcam_integer(property_name, value)
+            elif property_type == Tcam.PropertyType.ENUMERATION:
+                self.source.set_tcam_enumeration(property_name, value)
+            elif property_type == Tcam.PropertyType.BOOLEAN:
+                self.source.set_tcam_set_tcam_boolean(property_name, value)
+            else:
+                raise
         except GLib.Error as error:
             raise RuntimeError(
                 "Error set Property {0}: {1}", property_name, format(error))
